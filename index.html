@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>KD Ladder Factory V2</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <main class="app">
+    <header class="hero">
+      <div>
+        <p class="eyebrow">KD FACTORY</p>
+        <h1>사다리 · 핸드레일 공장단가 계산기</h1>
+        <p>제품 계산부터 견적서, JPG, PDF 저장까지 한 번에 처리합니다.</p>
+      </div>
+      <button id="resetAll" class="btn btn-outline-light">전체 초기화</button>
+    </header>
+
+    <section class="card">
+      <h2><span>01</span> 고객 정보</h2>
+      <div class="form-grid four">
+        <label>견적일자<input id="quoteDate" type="date" /></label>
+        <label>업체명<input id="company" placeholder="업체명 또는 고객명" /></label>
+        <label>담당자<input id="manager" placeholder="담당자명" /></label>
+        <label>연락처<input id="phone" placeholder="010-0000-0000" /></label>
+      </div>
+      <div class="form-grid two mt">
+        <label>이메일<input id="email" placeholder="example@email.com" /></label>
+        <label>현장명 / 비고<input id="site" placeholder="현장명 또는 전달사항" /></label>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2><span>02</span> 제품 계산</h2>
+
+      <div class="tabs" id="productTabs">
+        <button class="tab active" data-product="safe">안전망사다리</button>
+        <button class="tab" data-product="bending">밴딩사다리</button>
+        <button class="tab" data-product="straight">일자사다리</button>
+        <button class="tab" data-product="handrail">핸드레일</button>
+      </div>
+
+      <div id="ladderPanel">
+        <div class="segmented" id="ladderMaterial">
+          <button class="active" data-value="201">SUS201</button>
+          <button data-value="304">SUS304</button>
+        </div>
+
+        <div class="form-grid four">
+          <label>높이(mm)<input id="ladderHeight" type="number" min="1" placeholder="예: 6000" /></label>
+          <label>수량<input id="ladderQty" type="number" min="1" value="1" /></label>
+          <label>적용 단가<input id="ladderRate" readonly /></label>
+          <label>기본 금액<input id="ladderBaseAmount" readonly /></label>
+        </div>
+
+        <h3 class="sub-title">추가 옵션</h3>
+        <div class="option-grid" id="ladderOptions">
+          <div class="option-card">
+            <label class="check"><input type="checkbox" data-name="엘보" data-price="10000" /> 엘보</label>
+            <input class="option-qty" type="number" min="1" value="1" />
+            <small>10,000원 / 개</small>
+          </div>
+          <div class="option-card">
+            <label class="check"><input type="checkbox" data-name="베이스판" data-price="10000" /> 베이스판</label>
+            <input class="option-qty" type="number" min="1" value="1" />
+            <small>10,000원 / 개</small>
+          </div>
+          <div class="option-card">
+            <label class="check"><input type="checkbox" data-name="구름다리" data-price="80000" /> 구름다리</label>
+            <input class="option-qty" type="number" min="1" value="1" />
+            <small>80,000원 / 개</small>
+          </div>
+          <div class="option-card">
+            <label class="check"><input type="checkbox" data-name="시건장치" data-price="80000" /> 시건장치</label>
+            <input class="option-qty" type="number" min="1" value="1" />
+            <small>80,000원 / 개</small>
+          </div>
+        </div>
+
+        <div class="summary-grid">
+          <div><small>제품</small><strong id="ladderSummaryName">안전망사다리 SUS201</strong></div>
+          <div><small>적용 길이</small><strong id="ladderSummaryLength">0m</strong></div>
+          <div><small>옵션 금액</small><strong id="ladderSummaryOptions">0원</strong></div>
+          <div class="emphasis"><small>총 제품금액</small><strong id="ladderSummaryTotal">0원</strong></div>
+        </div>
+
+        <button id="addLadder" class="btn btn-primary full">+ 견적 목록에 추가</button>
+      </div>
+
+      <div id="handrailPanel" class="hidden">
+        <div class="notice">파이프 단가는 <b>pipe-price.json</b> 파일에서 불러옵니다. 단가가 바뀌면 이 파일만 수정하면 됩니다.</div>
+
+        <div class="table-actions">
+          <h3>파이프 구성</h3>
+          <button id="addPipeRow" class="btn btn-light">+ 파이프 추가</button>
+        </div>
+        <div id="pipeRows"></div>
+
+        <h3 class="sub-title">핸드레일 옵션</h3>
+        <div class="option-grid" id="handrailOptions">
+          <div class="option-card editable">
+            <label class="check"><input type="checkbox" data-name="엘보" /> 엘보</label>
+            <input class="option-qty" type="number" min="1" value="1" />
+            <input class="option-price" type="number" min="0" value="10000" />
+          </div>
+          <div class="option-card editable">
+            <label class="check"><input type="checkbox" data-name="베이스판" /> 베이스판</label>
+            <input class="option-qty" type="number" min="1" value="1" />
+            <input class="option-price" type="number" min="0" value="10000" />
+          </div>
+          <div class="option-card editable">
+            <label class="check"><input type="checkbox" data-name="브라켓" /> 브라켓</label>
+            <input class="option-qty" type="number" min="1" value="1" />
+            <input class="option-price" type="number" min="0" value="0" />
+          </div>
+          <div class="option-card editable">
+            <label class="check"><input type="checkbox" data-name="기타 추가금액" /> 기타 추가금액</label>
+            <input class="option-qty" type="hidden" value="1" />
+            <input class="option-price" type="number" min="0" value="0" />
+          </div>
+        </div>
+
+        <div class="form-grid three mt">
+          <label>포스트 수량<input id="postQty" type="number" min="0" value="0" /></label>
+          <label>포스트 개당 단가<input id="postPrice" type="number" min="0" value="0" /></label>
+          <label>핸드레일 세트 수량<input id="handrailQty" type="number" min="1" value="1" /></label>
+        </div>
+        <label class="block mt">비고<input id="handrailNote" placeholder="현장 조건 또는 추가 작업" /></label>
+
+        <div class="summary-grid">
+          <div><small>파이프 종류</small><strong id="pipeKindCount">1종</strong></div>
+          <div><small>총 파이프 길이</small><strong id="pipeLengthTotal">0m</strong></div>
+          <div><small>옵션 · 포스트</small><strong id="handrailOptionTotal">0원</strong></div>
+          <div class="emphasis"><small>총 제품금액</small><strong id="handrailGrandTotal">0원</strong></div>
+        </div>
+
+        <button id="addHandrail" class="btn btn-primary full">+ 견적 목록에 추가</button>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2><span>03</span> 견적 목록</h2>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>No.</th><th>제품명</th><th>규격</th><th>수량</th><th>단가</th><th>금액</th><th>비고</th><th></th></tr></thead>
+          <tbody id="quoteItems"></tbody>
+        </table>
+      </div>
+      <div class="totals">
+        <div>공급가액 <b id="subtotal">0원</b></div>
+        <div>부가세 <b id="vat">0원</b></div>
+        <div class="final">최종 견적금액 <b id="grandTotal">0원</b></div>
+      </div>
+      <div class="footer-actions">
+        <button id="saveDraft" class="btn btn-light">현재 견적 저장</button>
+        <button id="loadDraft" class="btn btn-light">저장 견적 불러오기</button>
+        <button id="makeQuote" class="btn btn-primary">견적서 만들기</button>
+      </div>
+    </section>
+  </main>
+
+  <div id="quoteModal" class="modal hidden">
+    <div class="modal-inner">
+      <div class="quote-toolbar">
+        <button id="closeQuote" class="btn btn-light">닫기</button>
+        <button id="saveJpg" class="btn btn-success">JPG 저장</button>
+        <button id="printQuote" class="btn btn-primary">PDF / 인쇄</button>
+      </div>
+      <article id="quoteSheet">
+        <h1>견 적 서</h1>
+        <div class="quote-info-grid">
+          <div class="quote-box" id="quoteCustomer"></div>
+          <div class="quote-box">
+            <div><b>상호</b><span>㈜강동자바라</span></div>
+            <div><b>대표자</b><span>김영규</span></div>
+            <div><b>사업자번호</b><span>221-81-49797</span></div>
+            <div><b>대표번호</b><span>1577-6084</span></div>
+            <div><b>이메일</b><span>jk0820s@naver.com</span></div>
+            <div><b>주소</b><span>경기도 광주시 곤지암읍 구수동길 1-26</span></div>
+          </div>
+        </div>
+        <div class="quote-total-line"><span>아래와 같이 견적합니다.</span><b id="quoteGrand"></b></div>
+        <table class="quote-table">
+          <thead><tr><th>No.</th><th>제품명</th><th>규격</th><th>수량</th><th>단가</th><th>금액</th><th>비고</th></tr></thead>
+          <tbody id="quoteSheetItems"></tbody>
+        </table>
+        <div class="quote-bottom">
+          <div class="terms">
+            <b>견적 조건</b>
+            <p>선입금 100% 확인 후 제작 일정이 확정됩니다.</p>
+            <p>현장 조건 및 추가 제작 조건에 따라 금액이 변경될 수 있습니다.</p>
+            <p>납품 담당자: 010-3050-0482</p>
+            <p>입금계좌: 기업은행 242-134872-04-021 / ㈜강동자바라</p>
+          </div>
+          <div class="quote-box" id="quoteTotals"></div>
+        </div>
+      </article>
+    </div>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>
