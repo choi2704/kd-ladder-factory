@@ -46,6 +46,7 @@ function bindEvents() {
   $('addPipeRow').addEventListener('click', addPipeRow);
   $('addLadder').addEventListener('click', addLadderItem);
   $('addHandrail').addEventListener('click', addHandrailItem);
+  $('addExtraCost').addEventListener('click', addExtraCostItem);
   $('makeQuote').addEventListener('click', openQuote);
   $('closeQuote').addEventListener('click', () => $('quoteModal').classList.add('hidden'));
   $('printQuote').addEventListener('click', () => window.print());
@@ -240,6 +241,29 @@ function addHandrailItem() {
   renderItems();
 }
 
+function addExtraCostItem() {
+  const name = $('extraCostName').value.trim();
+  const amount = Number($('extraCostAmount').value) || 0;
+  const note = $('extraCostNote').value.trim();
+
+  if (!name) return alert('기타 비용명을 입력해주세요.');
+  if (amount <= 0) return alert('기타 비용 금액을 입력해주세요.');
+
+  quoteItems.push({
+    name,
+    spec: '기타 비용',
+    qty: 1,
+    unit: Math.round(amount),
+    amount: Math.round(amount),
+    note
+  });
+
+  $('extraCostName').value = '';
+  $('extraCostAmount').value = '';
+  $('extraCostNote').value = '';
+  renderItems();
+}
+
 function renderItems() {
   $('quoteItems').innerHTML = quoteItems.map((item, index) => `
     <tr>
@@ -290,7 +314,7 @@ async function saveJpg() {
 function resetAll() {
   if (!confirm('전체 내용을 초기화할까요?')) return;
   quoteItems = [];
-  ['company','manager','phone','email','site','ladderHeight','handrailNote'].forEach(id => $(id).value = '');
+  ['company','manager','phone','email','site','ladderHeight','handrailNote','extraCostName','extraCostAmount','extraCostNote'].forEach(id => $(id).value = '');
   $('ladderQty').value = 1; $('handrailQty').value = 1; $('postQty').value = 0; $('postPrice').value = 0;
   document.querySelectorAll('input[type=checkbox]').forEach(x => x.checked = false);
   renderItems(); calculateLadder(); calculateHandrail();
