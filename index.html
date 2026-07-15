@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>KD Ladder Factory</title>
+<style>
+:root{--navy:#0e3155;--blue:#eaf2f9;--line:#cad8e7;--bg:#f3f7fb;--green:#e7f5ec;--red:#fff0f0}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);font-family:Pretendard,"Noto Sans KR",Arial,sans-serif;color:#0b1e33}
+.wrap{max-width:1180px;margin:auto;padding:24px}.hero{background:var(--navy);color:#fff;border-radius:22px;padding:25px 28px;margin-bottom:18px}
+.hero h1{margin:0 0 5px;font-size:28px}.hero p{margin:0;opacity:.85}
+.card{background:#fff;border:1px solid var(--line);border-radius:20px;padding:26px;margin-bottom:18px;box-shadow:0 8px 24px rgba(14,49,85,.05)}
+.sec{display:flex;align-items:center;gap:10px;margin:0 0 22px;font-size:22px}.num{background:var(--navy);color:#fff;border-radius:20px;padding:6px 10px;font-size:13px}
+.tabs,.choices{display:flex;gap:9px;flex-wrap:wrap;margin-bottom:18px}
+button{font:inherit}.tab,.choice,.btn{border:1px solid var(--line);background:#fff;border-radius:10px;padding:12px 18px;font-weight:700;cursor:pointer}
+.tab.active,.choice.active{background:var(--navy);color:#fff;border-color:var(--navy)}
+.btn.primary{width:100%;background:var(--navy);color:#fff;border:0;padding:15px}.btn.green{background:#198754;color:#fff;border:0}.btn.light{background:var(--blue);border:0}
+.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+label{display:block;font-weight:700;font-size:14px;margin-bottom:7px}input,select{width:100%;padding:13px 14px;border:1px solid var(--line);border-radius:10px;background:#fff;font-size:15px}
+.result{display:grid;grid-template-columns:repeat(4,1fr);border:1px solid var(--line);border-radius:14px;overflow:hidden;margin:18px 0}
+.result>div{padding:15px;border-right:1px solid var(--line)}.result>div:last-child{border-right:0;background:var(--blue)}
+.mini{font-size:12px;color:#60758c;margin-bottom:5px}.big{font-size:19px;font-weight:800}
+.option-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:15px}.opt{border:1px solid var(--line);border-radius:12px;padding:12px;background:#fbfdff}
+.opt input{width:auto;margin-right:5px}.hidden{display:none!important}
+.pipe-row{display:grid;grid-template-columns:1.05fr 1fr 1.2fr .8fr .9fr .75fr 44px;gap:8px;align-items:end;padding:12px;border:1px solid var(--line);border-radius:14px;margin:10px 0;background:#fbfdff}
+.remove{height:44px;border:0;border-radius:9px;background:#ffe7e7;color:#b42318;cursor:pointer;font-weight:800}
+.note{background:#fff6d8;border-radius:12px;padding:12px 14px;color:#735c00;font-size:13px;margin-top:12px}
+table{width:100%;border-collapse:collapse}th{background:var(--navy);color:#fff;padding:12px}td{border:1px solid var(--line);padding:11px;text-align:center}.totals{display:flex;justify-content:flex-end;gap:9px;flex-wrap:wrap;margin-top:16px}.pill{padding:13px 16px;background:var(--blue);border-radius:11px;font-weight:700}.pill.final{background:var(--navy);color:#fff}
+.actions{display:flex;justify-content:flex-end;gap:10px;margin-top:14px}
+#quoteModal{position:fixed;inset:0;background:rgba(0,0,0,.55);display:none;z-index:20;overflow:auto;padding:24px}.quote-wrap{max-width:900px;margin:auto}.quote-toolbar{display:flex;gap:8px;justify-content:flex-end;margin-bottom:10px}
+#quote{background:#fff;padding:30px;color:#111}.qtitle{text-align:center;font-size:30px;letter-spacing:16px;margin:0 0 25px}.qinfo{display:grid;grid-template-columns:1fr 1fr;gap:12px}.qbox{border:1px solid #b9c9d8}.qrow{display:grid;grid-template-columns:110px 1fr;border-bottom:1px solid #b9c9d8}.qrow:last-child{border:0}.qrow b,.qrow span{padding:9px}.qrow b{background:#edf3f8;text-align:center}.qsum{border:2px solid var(--navy);padding:14px;margin:18px 0;font-weight:800;display:flex;justify-content:space-between}
+@media(max-width:850px){.grid,.result,.option-grid{grid-template-columns:1fr 1fr}.pipe-row{grid-template-columns:1fr 1fr}.pipe-row .remove{grid-column:2}.qinfo{grid-template-columns:1fr}}
+@media(max-width:520px){.wrap{padding:10px}.grid,.grid2,.result,.option-grid{grid-template-columns:1fr}.result>div{border-right:0;border-bottom:1px solid var(--line)}}
+@media print{body>*:not(#quoteModal){display:none!important}#quoteModal{position:static;display:block!important;background:#fff;padding:0}#quote{padding:10mm}.quote-toolbar{display:none}@page{size:A4 portrait;margin:8mm}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="hero"><h1>KD LADDER FACTORY</h1><p>강동자바라 사다리 · 핸드레일 공장단가 계산기</p></div>
+
+  <section class="card">
+    <h2 class="sec"><span class="num">01</span> 고객 정보</h2>
+    <div class="grid">
+      <div><label>견적일자</label><input id="date" type="date"></div>
+      <div><label>업체명</label><input id="company" placeholder="업체명 또는 고객명"></div>
+      <div><label>담당자</label><input id="manager" placeholder="담당자명"></div>
+      <div><label>연락처</label><input id="phone" placeholder="010-0000-0000"></div>
+    </div>
+    <div class="grid2" style="margin-top:14px">
+      <div><label>이메일</label><input id="email" placeholder="example@email.com"></div>
+      <div><label>현장명 / 비고</label><input id="site" placeholder="현장명 또는 전달사항"></div>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2 class="sec"><span class="num">02</span> 제품 계산</h2>
+    <div class="tabs">
+      <button class="tab active" data-type="safe">안전망사다리</button>
+      <button class="tab" data-type="bending">밴딩사다리</button>
+      <button class="tab" data-type="straight">일자사다리</button>
+      <button class="tab" data-type="rail">핸드레일</button>
+    </div>
+
+    <div id="ladderPanel">
+      <div class="choices" id="materialChoices">
+        <button class="choice active" data-mat="201">SUS201</button>
+        <button class="choice" data-mat="304">SUS304</button>
+      </div>
+      <div class="grid">
+        <div><label>사다리 높이(mm)</label><input id="ladderHeight" type="number" min="1" placeholder="예: 6000"></div>
+        <div><label>수량</label><input id="ladderQty" type="number" min="1" value="1"></div>
+        <div><label>단가(원/m)</label><input id="ladderRate" readonly></div>
+        <div><label>제품금액</label><input id="ladderAmount" readonly></div>
+      </div>
+      <div class="option-grid">
+        <label class="opt"><input class="optCheck" type="checkbox" data-name="엘보" data-price="10000"> 엘보 10,000원/개 <input class="optQty" type="number" min="1" value="1"></label>
+        <label class="opt"><input class="optCheck" type="checkbox" data-name="베이스판" data-price="10000"> 베이스판 10,000원/개 <input class="optQty" type="number" min="1" value="1"></label>
+        <label class="opt"><input class="optCheck" type="checkbox" data-name="구름다리" data-price="80000"> 구름다리 80,000원/개 <input class="optQty" type="number" min="1" value="1"></label>
+        <label class="opt"><input class="optCheck" type="checkbox" data-name="시건장치" data-price="80000"> 시건장치 80,000원/개 <input class="optQty" type="number" min="1" value="1"></label>
+      </div>
+      <div class="result">
+        <div><div class="mini">선택 제품</div><div class="big" id="rProduct">안전망사다리 SUS201</div></div>
+        <div><div class="mini">적용 길이</div><div class="big" id="rLength">0m</div></div>
+        <div><div class="mini">옵션 금액</div><div class="big" id="rOption">0원</div></div>
+        <div><div class="mini">총 제품금액</div><div class="big" id="rTotal">0원</div></div>
+      </div>
+      <button class="btn primary" id="addLadder">+ 견적 목록에 추가</button>
+    </div>
+
+    <div id="railPanel" class="hidden">
+      <div class="note">파이프 단가는 보내주신 2026년 4월 11일 시행 201·STS304 가격표의 원/m 단가입니다. 여러 종류의 파이프를 추가하여 합산할 수 있습니다.</div>
+      <div id="pipeRows"></div>
+      <button class="btn light" id="addPipeRow">+ 파이프 종류 추가</button>
+      <div class="result">
+        <div><div class="mini">파이프 종류 수</div><div class="big" id="pipeCount">1종</div></div>
+        <div><div class="mini">총 길이</div><div class="big" id="pipeLength">0m</div></div>
+        <div><div class="mini">수량</div><div class="big" id="railQtyText">1</div></div>
+        <div><div class="mini">총 제품금액</div><div class="big" id="pipeTotal">0원</div></div>
+      </div>
+      <div class="grid2" style="margin-bottom:15px">
+        <div><label>핸드레일 세트 수량</label><input id="railQty" type="number" min="1" value="1"></div>
+        <div><label>비고</label><input id="railNote" placeholder="예: 현장 절단 포함"></div>
+      </div>
+      <button class="btn primary" id="addRail">+ 견적 목록에 추가</button>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2 class="sec"><span class="num">03</span> 견적 목록</h2>
+    <div style="overflow:auto"><table><thead><tr><th>No.</th><th>제품명</th><th>규격</th><th>수량</th><th>단가</th><th>금액</th><th>비고</th><th></th></tr></thead><tbody id="items"></tbody></table></div>
+    <div class="totals">
+      <div class="pill">공급가액 <span id="subtotal">0원</span></div>
+      <div class="pill">부가세 <span id="vat">0원</span></div>
+      <div class="pill final">최종 견적금액 <span id="grand">0원</span></div>
+    </div>
+    <div class="actions"><button class="btn light" id="reset">전체 초기화</button><button class="btn primary" style="width:auto" id="makeQuote">견적서 만들기</button></div>
+  </section>
+</div>
+
+<div id="quoteModal">
+ <div class="quote-wrap">
+  <div class="quote-toolbar"><button class="btn light" onclick="closeQuote()">닫기</button><button class="btn green" onclick="saveJpg()">JPG 저장</button><button class="btn primary" style="width:auto" onclick="window.print()">PDF / 인쇄</button></div>
+  <div id="quote">
+   <h1 class="qtitle">견 적 서</h1>
+   <div class="qinfo">
+    <div class="qbox" id="qCustomer"></div>
+    <div class="qbox">
+      <div class="qrow"><b>상호</b><span>㈜강동자바라</span></div>
+      <div class="qrow"><b>대표자</b><span>김영규</span></div>
+      <div class="qrow"><b>사업자번호</b><span>221-81-49797</span></div>
+      <div class="qrow"><b>연락처</b><span>1577-6084</span></div>
+      <div class="qrow"><b>이메일</b><span>jk0820s@naver.com</span></div>
+      <div class="qrow"><b>주소</b><span>경기도 광주시 곤지암읍 구수동길 1-26</span></div>
+    </div>
+   </div>
+   <div class="qsum"><span>아래와 같이 견적합니다.</span><span id="qGrand"></span></div>
+   <table><thead><tr><th>No.</th><th>제품명</th><th>규격</th><th>수량</th><th>단가</th><th>금액</th><th>비고</th></tr></thead><tbody id="qItems"></tbody></table>
+   <div class="qinfo" style="margin-top:15px">
+    <div class="qbox" style="padding:15px;line-height:1.8"><b>견적 조건</b><br>선입금 100% 확인 후 제작 일정이 확정됩니다.<br>현장 조건 및 추가 제작 조건에 따라 금액이 변경될 수 있습니다.<br>납품 담당자: 010-3050-0482<br>입금계좌: 기업은행 242-134872-04-021 / ㈜강동자바라</div>
+    <div class="qbox" id="qTotals"></div>
+   </div>
+  </div>
+ </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script>
+const roundPrices={
+"201":{"12.7":{"0.5":659,"0.7":883,"0.9":1080,"1.1":1300},"15.8":{"0.5":775,"0.7":1020,"0.9":1252,"1.1":1480,"1.5":2069},"19.1":{"0.5":897,"0.7":1179,"0.9":1442,"1.1":1745,"1.5":2455,"2.0":3384},"22.3":{"0.9":1665,"1.1":2014,"1.5":2824,"2.0":3990},"25.4":{"0.7":1511,"0.9":1875,"1.1":2274,"1.5":3148,"2.0":4312},"27.2":{"0.9":2046,"1.1":2480,"1.5":3449,"2.0":4642},"31.8":{"0.7":1914,"0.9":2355,"1.1":2871,"1.5":3994,"2.0":5387},"34.0":{"0.9":2626,"1.1":3154,"1.5":4446,"2.0":6004},"38.1":{"0.7":2293,"0.9":2847,"1.1":3476,"1.5":4859,"2.0":6577},"42.7":{"1.1":3955,"1.5":5596,"2.0":7579},"48.6":{"1.1":4588,"1.5":6325,"2.0":8582,"3.0":14140},"50.8":{"0.9":3819,"1.1":4593,"1.5":6547,"2.0":8756,"3.0":17715},"60.5":{"1.1":5738,"1.5":8043,"2.0":10938,"3.0":18148},"63.5":{"0.9":4772,"1.1":5840,"1.5":8266,"2.0":11122,"3.0":21988},"76.3":{"1.1":6981,"1.5":9855,"2.0":13435,"3.0":26268},"89.1":{"1.1":8368,"1.5":12078,"2.0":16760,"3.0":28376},"96.0":{"1.1":9025,"1.5":13031,"2.0":18088,"3.0":29575},"101.6":{"0.9":8203,"1.1":9516,"1.5":13395,"2.0":18617,"3.0":33730},"114.3":{"1.5":15842,"2.0":20994,"3.0":36811},"127.0":{"1.1":12300,"1.5":17304,"2.0":23367,"3.0":42432},"139.8":{"2.0":27643,"3.0":45121},"152.4":{"1.1":15464,"1.5":21347,"2.0":28839,"3.0":48987},"165.2":{"2.0":31620,"3.0":58505},"191.0":{"1.5":31366,"2.0":39461,"3.0":64860},"216.3":{"1.5":34781,"2.0":43716,"3.0":64860}},
+"304":{"12.7":{"0.5":955,"0.7":1269,"0.9":1569,"1.1":1834,"1.5":2527},"15.8":{"0.5":1152,"0.7":1513,"0.9":1871,"1.1":2171,"1.5":2891},"19.1":{"0.5":1356,"0.7":1786,"0.9":2209,"1.1":2594,"1.5":3478,"2.0":4590},"22.3":{"0.9":2568,"1.1":3019,"1.5":4038,"2.0":5421},"25.4":{"0.7":2333,"0.9":2909,"1.1":3428,"1.5":4551,"2.0":5986},"27.2":{"1.1":3716,"1.5":4953,"2.0":6443},"31.8":{"0.7":2947,"0.9":3663,"1.1":4329,"1.5":5769,"2.0":7530},"34.0":{"1.1":4706,"1.5":6341,"2.0":8284},"38.1":{"0.7":3537,"0.9":4419,"1.1":5231,"1.5":7007,"2.0":9168},"42.7":{"1.1":5925,"1.5":7998,"2.0":10489},"48.6":{"1.1":6833,"1.5":9080,"2.0":11921,"3.0":19017},"50.8":{"0.9":5930,"1.1":6958,"1.5":9435,"2.0":12267,"3.0":23530},"60.5":{"1.1":8544,"1.5":11488,"2.0":15109,"3.0":24300},"63.5":{"0.9":7416,"1.1":8801,"1.5":11895,"2.0":15538,"3.0":29444},"76.3":{"1.1":10556,"1.5":14243,"2.0":18773,"3.0":34988},"89.1":{"1.1":12530,"1.5":17177,"2.0":22936,"3.0":37794},"96.0":{"1.1":13512,"1.5":18531,"2.0":24754,"3.0":39603},"101.6":{"1.1":14279,"1.5":19250,"2.0":25728,"3.0":45020},"114.3":{"1.5":22386,"2.0":29010,"3.0":49458},"127.0":{"1.1":18237,"1.5":24608,"2.0":32292,"3.0":56237},"139.8":{"2.0":37332,"3.0":60291},"152.4":{"1.1":22546,"1.5":30090,"2.0":39511,"3.0":65453},"165.2":{"1.5":42004,"2.0":52635,"3.0":77466},"191.0":{"1.5":46896,"2.0":58729,"3.0":86475},"216.3":{"1.5":46896,"2.0":58729,"3.0":86475}}
+};
+const squarePrices={
+"201":{"10/10":{"0.7":1034,"0.9":1258,"1.1":1506},"12/12":{"0.7":1171,"0.9":1430,"1.1":1685},"10/20, 15/15":{"0.7":1330,"0.9":1621,"1.1":1950,"1.5":2687},"10/30, 15/25, 20/20":{"0.7":1675,"0.9":2067,"1.1":2493,"1.5":3394,"2.0":4587},"10/40, 20/30, 25/25":{"0.9":2574,"1.1":3118,"1.5":4269,"2.0":5744},"10/50, 20/40, 30/30":{"0.7":2512,"0.9":3094,"1.1":3750,"1.5":5161,"2.0":6961},"20/60, 30/50, 40/40":{"0.9":4175,"1.1":4978,"1.5":6956,"2.0":9222},"30/70, 40/60, 50/50":{"0.9":5211,"1.1":6321,"1.5":8758,"2.0":11697},"40/80, 50/70, 60/60":{"1.1":7638,"1.5":10619,"2.0":14309},"40/100, 50/90, 70/70":{"1.1":9192,"1.5":12956,"2.0":18126},"50/100, 60/90, 75/75":{"1.1":10012,"1.5":14194,"2.0":19870,"3.0":33104},"60/100, 80/80":{"1.1":10832,"1.5":14896,"2.0":20667,"3.0":35742},"40/120":{"1.1":12254,"1.5":16136,"2.0":21906,"3.0":42234},"50/150, 75/125, 80/120,100/100":{"1.1":14220,"1.5":19633,"2.0":26656,"3.0":51622},"120/120":{"1.5":24142,"2.0":32774,"3.0":58585},"130/130":{"2.0":37098,"3.0":73567},"150/150":{"2.0":49741,"3.0":73567}},
+"304":{"10/10":{"0.7":1408,"0.9":1733,"1.1":2024},"12/12":{"0.7":1653,"0.9":2036,"1.1":2361},"10/20, 15/15":{"0.7":1926,"0.9":2373,"1.1":2783,"1.5":3693},"10/30, 15/25, 20/20":{"0.7":2485,"0.9":3086,"1.1":3630,"1.5":4779,"2.0":6240},"10/40, 20/30, 25/25":{"0.9":3866,"1.1":4557,"1.5":6022,"2.0":7859},"10/50, 20/40, 30/30":{"0.7":3739,"0.9":4647,"1.1":5485,"1.5":7285,"2.0":9524},"20/60, 30/50, 40/40":{"0.9":6257,"1.1":7314,"1.5":9814,"2.0":12697,"3.0":19967},"30/70, 40/60, 50/50":{"0.9":7822,"1.1":9244,"1.5":12350,"2.0":16068,"3.0":25539},"40/80, 50/70, 60/60":{"0.9":9596,"1.1":11162,"1.5":14950,"2.0":19584,"3.0":31225},"40/100, 50/90, 70/70":{"1.1":13292,"1.5":17988,"2.0":24199,"3.0":37291},"50/100, 60/90, 75/75":{"1.1":14425,"1.5":19608,"2.0":26403,"3.0":40901},"60/100, 80/80":{"1.1":15497,"1.5":20641,"2.0":27623,"3.0":42867},"40/120":{"1.1":16810,"1.5":21782,"2.0":28765,"3.0":45298},"50/150, 75/125, 80/120,100/100":{"1.1":20010,"1.5":26765,"2.0":35325,"3.0":54462},"120/120":{"1.5":32672,"2.0":43152,"3.0":66298},"130/130":{"2.0":48249,"3.0":74326},"150/150":{"2.0":62136,"3.0":91389}}
+};
+const ladderRates={safe:{201:65000,304:75000},bending:{201:45000,304:55000},straight:{304:52000}};
+const labels={safe:"안전망사다리",bending:"밴딩사다리",straight:"일자사다리"};
+let type="safe",mat="201",quoteItems=[];
+const fmt=n=>Math.round(n||0).toLocaleString("ko-KR")+"원";
+date.value=new Date().toISOString().slice(0,10);
+
+document.querySelectorAll(".tab").forEach(b=>b.onclick=()=>{document.querySelectorAll(".tab").forEach(x=>x.classList.remove("active"));b.classList.add("active");type=b.dataset.type;railPanel.classList.toggle("hidden",type!=="rail");ladderPanel.classList.toggle("hidden",type==="rail");if(type==="straight"){mat="304";document.querySelectorAll(".choice").forEach(x=>x.classList.toggle("active",x.dataset.mat==="304"));document.querySelector('[data-mat="201"]').style.display="none"}else document.querySelector('[data-mat="201"]').style.display="";calcLadder()});
+document.querySelectorAll(".choice").forEach(b=>b.onclick=()=>{mat=b.dataset.mat;document.querySelectorAll(".choice").forEach(x=>x.classList.toggle("active",x===b));calcLadder()});
+[ladderHeight,ladderQty].forEach(x=>x.oninput=calcLadder);document.querySelectorAll(".optCheck,.optQty").forEach(x=>x.oninput=calcLadder);
+
+function optionTotal(){let s=0;document.querySelectorAll(".opt").forEach(o=>{let c=o.querySelector(".optCheck"),q=o.querySelector(".optQty");if(c.checked)s+=+c.dataset.price*(+q.value||1)});return s}
+function optionText(){let a=[];document.querySelectorAll(".opt").forEach(o=>{let c=o.querySelector(".optCheck"),q=o.querySelector(".optQty");if(c.checked)a.push(`${c.dataset.name} ${q.value||1}개`)});return a.join(", ")}
+function calcLadder(){if(type==="rail")return;let rate=ladderRates[type]?.[mat]||0,h=(+ladderHeight.value||0)/1000,q=+ladderQty.value||1,base=rate*h*q,opt=optionTotal();ladderRate.value=fmt(rate);ladderAmount.value=fmt(base+opt);rProduct.textContent=`${labels[type]} SUS${mat}`;rLength.textContent=h+"m";rOption.textContent=fmt(opt);rTotal.textContent=fmt(base+opt)}
+calcLadder();
+
+addLadder.onclick=()=>{let h=(+ladderHeight.value||0)/1000,q=+ladderQty.value||1,rate=ladderRates[type]?.[mat]||0;if(!h||!rate)return alert("높이와 재질을 확인해주세요.");let opt=optionTotal(),amount=rate*h*q+opt;quoteItems.push({name:`${labels[type]} SUS${mat}`,spec:`높이 ${h}m`,qty:q,unit:Math.round(rate*h),amount,note:optionText()});renderItems()};
+
+function priceData(material,shape){return shape==="round"?roundPrices[material]:squarePrices[material]}
+function addPipe(){
+ const row=document.createElement("div");row.className="pipe-row";
+ row.innerHTML=`<div><label>재질</label><select class="pmat"><option>201</option><option>304</option></select></div>
+ <div><label>형태</label><select class="pshape"><option value="round">원파이프</option><option value="square">사각파이프</option></select></div>
+ <div><label>외경 / 규격</label><select class="psize"></select></div>
+ <div><label>두께(T)</label><select class="pthick"></select></div>
+ <div><label>길이(m)</label><input class="plen" type="number" min="0" step="0.1" placeholder="예: 7.9"></div>
+ <div><label>단가</label><input class="pprice" readonly></div><button class="remove">×</button>`;
+ pipeRows.appendChild(row);
+ const els=row.querySelectorAll("select,input");els.forEach(e=>e.oninput=()=>{if(e.classList.contains("pmat")||e.classList.contains("pshape"))fillSizes(row);else if(e.classList.contains("psize"))fillThickness(row);calcPipes()});
+ row.querySelector(".remove").onclick=()=>{if(document.querySelectorAll(".pipe-row").length>1)row.remove();calcPipes()};
+ fillSizes(row);calcPipes();
+}
+function fillSizes(row){let m=row.querySelector(".pmat").value,s=row.querySelector(".pshape").value,d=priceData(m,s),sel=row.querySelector(".psize");sel.innerHTML=Object.keys(d).map(x=>`<option>${x}</option>`).join("");fillThickness(row)}
+function fillThickness(row){let m=row.querySelector(".pmat").value,s=row.querySelector(".pshape").value,z=row.querySelector(".psize").value,d=priceData(m,s)[z],sel=row.querySelector(".pthick");sel.innerHTML=Object.keys(d).map(x=>`<option>${x}</option>`).join("");calcPipes()}
+function calcPipes(){let total=0,len=0,qty=+railQty.value||1;document.querySelectorAll(".pipe-row").forEach(r=>{let m=r.querySelector(".pmat").value,s=r.querySelector(".pshape").value,z=r.querySelector(".psize").value,t=r.querySelector(".pthick").value,l=+r.querySelector(".plen").value||0,p=priceData(m,s)?.[z]?.[t]||0;r.querySelector(".pprice").value=fmt(p);total+=p*l;len+=l});pipeCount.textContent=document.querySelectorAll(".pipe-row").length+"종";pipeLength.textContent=len.toFixed(2).replace(/\.00$/,"")+"m";railQtyText.textContent=qty;pipeTotal.textContent=fmt(total*qty)}
+addPipeRow.onclick=addPipe;railQty.oninput=calcPipes;addPipe();
+addRail.onclick=()=>{let qty=+railQty.value||1,parts=[],one=0,totalLen=0;document.querySelectorAll(".pipe-row").forEach(r=>{let m=r.querySelector(".pmat").value,s=r.querySelector(".pshape").value,z=r.querySelector(".psize").value,t=r.querySelector(".pthick").value,l=+r.querySelector(".plen").value||0,p=priceData(m,s)?.[z]?.[t]||0;if(l){parts.push(`SUS${m} ${s==="round"?"원":"사각"} ${z}×${t}T ${l}m`);one+=p*l;totalLen+=l}});if(!parts.length)return alert("파이프 길이를 입력해주세요.");quoteItems.push({name:"핸드레일",spec:parts.join(" / "),qty,unit:Math.round(one),amount:Math.round(one*qty),note:railNote.value});renderItems()};
+
+function renderItems(){const itemsEl=quoteItems;document.getElementById("items").innerHTML=itemsEl.map((x,i)=>`<tr><td>${i+1}</td><td>${x.name}</td><td>${x.spec}</td><td>${x.qty}</td><td>${fmt(x.unit)}</td><td>${fmt(x.amount)}</td><td>${x.note||""}</td><td><button class="remove" onclick="delItem(${i})">삭제</button></td></tr>`).join("");let sub=itemsEl.reduce((a,b)=>a+b.amount,0),v=Math.round(sub*.1);subtotal.textContent=fmt(sub);vat.textContent=fmt(v);grand.textContent=fmt(sub+v)}
+function delItem(i){quoteItems.splice(i,1);renderItems()}window.delItem=delItem;
+reset.onclick=()=>{if(confirm("전체 견적을 초기화할까요?")){quoteItems=[];renderItems()}};
+
+makeQuote.onclick=()=>{if(!quoteItems.length)return alert("견적 목록에 제품을 추가해주세요.");qCustomer.innerHTML=`<div class="qrow"><b>견적일자</b><span>${date.value}</span></div><div class="qrow"><b>업체명</b><span>${company.value}</span></div><div class="qrow"><b>담당자</b><span>${manager.value}</span></div><div class="qrow"><b>연락처</b><span>${phone.value}</span></div><div class="qrow"><b>이메일</b><span>${email.value}</span></div><div class="qrow"><b>현장명</b><span>${site.value}</span></div>`;qItems.innerHTML=quoteItems.map((x,i)=>`<tr><td>${i+1}</td><td>${x.name}</td><td>${x.spec}</td><td>${x.qty}</td><td>${fmt(x.unit)}</td><td>${fmt(x.amount)}</td><td>${x.note||""}</td></tr>`).join("");let s=quoteItems.reduce((a,b)=>a+b.amount,0),v=Math.round(s*.1);qGrand.textContent=`총금액 ${fmt(s+v)} (V.A.T. 포함)`;qTotals.innerHTML=`<div class="qrow"><b>공급가액</b><span>${fmt(s)}</span></div><div class="qrow"><b>부가세</b><span>${fmt(v)}</span></div><div class="qrow"><b>총금액</b><span style="font-size:20px;font-weight:900">${fmt(s+v)}</span></div>`;quoteModal.style.display="block"};
+function closeQuote(){quoteModal.style.display="none"}window.closeQuote=closeQuote;
+async function saveJpg(){const c=await html2canvas(document.getElementById("quote"),{scale:2,useCORS:true,backgroundColor:"#fff"});const a=document.createElement("a");a.download=`강동자바라_사다리견적서_${company.value||"고객"}_${date.value}.jpg`;a.href=c.toDataURL("image/jpeg",.95);a.click()}window.saveJpg=saveJpg;
+</script>
+</body></html>
