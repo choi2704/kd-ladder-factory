@@ -39,6 +39,7 @@ function bindEvents() {
     });
   });
   ['ladderHeight','ladderQty'].forEach(id => $(id).addEventListener('input', calculateLadder));
+  $('applyLoss').addEventListener('change', calculateLadder);
   document.querySelectorAll('#ladderOptions input').forEach(el => el.addEventListener('input', calculateLadder));
   document.querySelectorAll('#handrailOptions input').forEach(el => el.addEventListener('input', calculateHandrail));
   ['postQty','postPrice','handrailQty'].forEach(id => $(id).addEventListener('input', calculateHandrail));
@@ -100,17 +101,34 @@ function getLadderOptions() {
   return { total, texts, details };
 }
 
+function getLadderLengths() {
+  const orderedLength = (Number($('ladderHeight').value) || 0) / 1000;
+  const useLoss = $('applyLoss').checked;
+
+  if (!orderedLength) {
+    return { orderedLength: 0, calculatedLength: useLoss ? 3 : 0, useLoss };
+  }
+
+  const calculatedLength = useLoss
+    ? Math.max(3, Math.ceil(orderedLength))
+    : orderedLength;
+
+  return { orderedLength, calculatedLength, useLoss };
+}
+
 function calculateLadder() {
   const config = ladderRates[currentProduct];
   const rate = config?.[currentMaterial] || 0;
-  const length = (Number($('ladderHeight').value)||0) / 1000;
-  const qty = Number($('ladderQty').value)||1;
-  const base = rate * length * qty;
+  const lengths = getLadderLengths();
+  const qty = Number($('ladderQty').value) || 1;
+  const base = rate * lengths.calculatedLength * qty;
   const options = getLadderOptions();
+
   $('ladderRate').value = fmt(rate);
   $('ladderBaseAmount').value = fmt(base);
-  $('ladderSummaryName').textContent = `${config?.label||''} SUS${currentMaterial}`;
-  $('ladderSummaryLength').textContent = `${length || 0}m`;
+  $('ladderSummaryName').textContent = `${config?.label || ''} SUS${currentMaterial}`;
+  $('ladderSummaryLength').textContent =
+    `${lengths.orderedLength || 0}m / ${lengths.calculatedLength || 0}m`;
   $('ladderSummaryOptions').textContent = fmt(options.total);
   $('ladderSummaryTotal').textContent = fmt(base + options.total);
 }
@@ -118,21 +136,23 @@ function calculateLadder() {
 function addLadderItem() {
   const config = ladderRates[currentProduct];
   const rate = config?.[currentMaterial] || 0;
-  const length = (Number($('ladderHeight').value) || 0) / 1000;
+  const lengths = getLadderLengths();
   const qty = Number($('ladderQty').value) || 1;
 
-  if (!length || !rate) return alert('높이와 재질을 확인해주세요.');
+  if (!lengths.orderedLength || !rate) {
+    return alert('높이와 재질을 확인해주세요.');
+  }
 
   const options = getLadderOptions();
-  const baseUnit = rate * length;
+  const baseUnit = rate * lengths.calculatedLength;
 
   quoteItems.push({
     name: `${config.label} SUS${currentMaterial}`,
-    spec: `높이 ${length}m`,
+    spec: `주문 ${lengths.orderedLength}m / 계산 ${lengths.calculatedLength}m`,
     qty,
     unit: Math.round(baseUnit),
     amount: Math.round(baseUnit * qty),
-    note: '사다리 본체'
+    note: lengths.useLoss ? '사다리 본체 · 로스 적용' : '사다리 본체 · 실제 길이 계산'
   });
 
   options.details.forEach(option => {
@@ -378,7 +398,7 @@ function resetAll() {
   if (!confirm('전체 내용을 초기화할까요?')) return;
   quoteItems = [];
   ['company','manager','phone','email','site','ladderHeight','handrailNote','extraCostName','extraCostAmount','extraCostNote'].forEach(id => $(id).value = '');
-  $('ladderQty').value = 1; $('handrailQty').value = 1; $('postQty').value = 0; $('postPrice').value = 0;
+  $('ladderQty').value = 1; $('handrailQty').value = 1; $('postQty').value = 0; $('postPrice').value = 0; $('applyLoss').checked = true;
   document.querySelectorAll('input[type=checkbox]').forEach(x => x.checked = false);
   renderItems(); calculateLadder(); calculateHandrail();
 }

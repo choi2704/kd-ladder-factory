@@ -5,3 +5,10 @@
 .extra-cost-grid .btn{height:47px;white-space:nowrap}
 @media(max-width:850px){.extra-cost-grid{grid-template-columns:1fr 1fr}}
 @media(max-width:540px){.extra-cost-grid{grid-template-columns:1fr}.extra-cost-grid .btn{width:100%}}
+
+.loss-toggle{display:flex;align-items:center;gap:9px;margin-top:14px;padding:12px 14px;border:1px solid #cad8e7;border-radius:12px;background:#f7fbff}
+.loss-toggle input{width:auto;margin:0}
+#ladderOptions.option-grid{grid-template-columns:repeat(5,1fr)}
+@media(max-width:1000px){#ladderOptions.option-grid{grid-template-columns:repeat(3,1fr)}}
+@media(max-width:700px){#ladderOptions.option-grid{grid-template-columns:1fr 1fr}}
+@media(max-width:540px){#ladderOptions.option-grid{grid-template-columns:1fr}}
