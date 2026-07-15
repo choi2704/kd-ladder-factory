@@ -77,16 +77,27 @@ function switchProduct(product) {
 function getLadderOptions() {
   let total = 0;
   const texts = [];
+  const details = [];
+
   document.querySelectorAll('#ladderOptions .option-card').forEach(card => {
     const check = card.querySelector('input[type=checkbox]');
     const qty = Number(card.querySelector('.option-qty').value) || 1;
+
     if (check.checked) {
-      const price = Number(check.dataset.price);
-      total += price * qty;
+      const price = Number(check.dataset.price) || 0;
+      const amount = price * qty;
+      total += amount;
       texts.push(`${check.dataset.name} ${qty}개`);
+      details.push({
+        name: check.dataset.name,
+        qty,
+        unit: price,
+        amount
+      });
     }
   });
-  return { total, texts };
+
+  return { total, texts, details };
 }
 
 function calculateLadder() {
@@ -107,19 +118,34 @@ function calculateLadder() {
 function addLadderItem() {
   const config = ladderRates[currentProduct];
   const rate = config?.[currentMaterial] || 0;
-  const length = (Number($('ladderHeight').value)||0) / 1000;
-  const qty = Number($('ladderQty').value)||1;
+  const length = (Number($('ladderHeight').value) || 0) / 1000;
+  const qty = Number($('ladderQty').value) || 1;
+
   if (!length || !rate) return alert('높이와 재질을 확인해주세요.');
+
   const options = getLadderOptions();
-  const amount = rate * length * qty + options.total;
+  const baseUnit = rate * length;
+
   quoteItems.push({
     name: `${config.label} SUS${currentMaterial}`,
     spec: `높이 ${length}m`,
     qty,
-    unit: Math.round(rate * length),
-    amount: Math.round(amount),
-    note: options.texts.join(', ')
+    unit: Math.round(baseUnit),
+    amount: Math.round(baseUnit * qty),
+    note: '사다리 본체'
   });
+
+  options.details.forEach(option => {
+    quoteItems.push({
+      name: option.name,
+      spec: `${config.label} 추가 옵션`,
+      qty: option.qty,
+      unit: Math.round(option.unit),
+      amount: Math.round(option.amount),
+      note: `${config.label} 옵션`
+    });
+  });
+
   renderItems();
 }
 
@@ -173,24 +199,49 @@ function fillThickness(row) {
 function getHandrailExtras() {
   let total = 0;
   const texts = [];
+  const details = [];
+
   document.querySelectorAll('#handrailOptions .option-card').forEach(card => {
     const check = card.querySelector('input[type=checkbox]');
     const qtyInput = card.querySelector('.option-qty');
     const priceInput = card.querySelector('.option-price');
+
     if (check.checked) {
-      const qty = Number(qtyInput?.value)||1;
-      const price = Number(priceInput?.value)||0;
-      total += qty * price;
-      texts.push(check.dataset.name === '기타 추가금액' ? `${check.dataset.name} ${fmt(price)}` : `${check.dataset.name} ${qty}개`);
+      const qty = Number(qtyInput?.value) || 1;
+      const price = Number(priceInput?.value) || 0;
+      const amount = qty * price;
+
+      total += amount;
+      texts.push(
+        check.dataset.name === '기타 추가금액'
+          ? `${check.dataset.name} ${fmt(price)}`
+          : `${check.dataset.name} ${qty}개`
+      );
+      details.push({
+        name: check.dataset.name,
+        qty,
+        unit: price,
+        amount
+      });
     }
   });
-  const postQty = Number($('postQty').value)||0;
-  const postPrice = Number($('postPrice').value)||0;
-  if (postQty > 0 && postPrice > 0) {
-    total += postQty * postPrice;
-    texts.push(`포스트 ${postQty}개`);
+
+  const postQtyValue = Number($('postQty').value) || 0;
+  const postPriceValue = Number($('postPrice').value) || 0;
+
+  if (postQtyValue > 0 && postPriceValue > 0) {
+    const amount = postQtyValue * postPriceValue;
+    total += amount;
+    texts.push(`포스트 ${postQtyValue}개`);
+    details.push({
+      name: '포스트',
+      qty: postQtyValue,
+      unit: postPriceValue,
+      amount
+    });
   }
-  return { total, texts };
+
+  return { total, texts, details };
 }
 
 function getPipeCalculation() {
@@ -225,19 +276,31 @@ function calculateHandrail() {
 function addHandrailItem() {
   const pipe = getPipeCalculation();
   if (!pipe.parts.length) return alert('파이프 길이를 입력해주세요.');
+
   const extras = getHandrailExtras();
-  const qty = Number($('handrailQty').value)||1;
-  const unit = pipe.oneSetPipeAmount + extras.total;
-  const notes = [...extras.texts];
-  if ($('handrailNote').value.trim()) notes.push($('handrailNote').value.trim());
+  const qty = Number($('handrailQty').value) || 1;
+  const note = $('handrailNote').value.trim();
+
   quoteItems.push({
     name: '핸드레일',
     spec: pipe.parts.join(' / '),
     qty,
-    unit: Math.round(unit),
-    amount: Math.round(unit * qty),
-    note: notes.join(', ')
+    unit: Math.round(pipe.oneSetPipeAmount),
+    amount: Math.round(pipe.oneSetPipeAmount * qty),
+    note: note || '파이프 본체'
   });
+
+  extras.details.forEach(option => {
+    quoteItems.push({
+      name: option.name,
+      spec: '핸드레일 추가 비용',
+      qty: option.qty * qty,
+      unit: Math.round(option.unit),
+      amount: Math.round(option.amount * qty),
+      note: '핸드레일 옵션'
+    });
+  });
+
   renderItems();
 }
 
